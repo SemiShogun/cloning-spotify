@@ -18,12 +18,31 @@ function App() {
 
     const _token = hash.access_token;
     if (_token) {
+      spotify.setAccessToken(_token);
+
       dispatch({
         type: "SET_TOKEN",
         token: _token,
       });
 
-      spotify.setAccessToken(_token);
+      spotify.getPlaylist("37i9dQZEVXbMDoHDwVN2tF").then(playlist => {
+        dispatch({
+          type: "SET_DISCOVER_WEEKLY",
+          discover_weekly: playlist,
+        });
+      });
+
+      spotify.getMyTopArtists().then(res => 
+        dispatch({
+          type: "SET_TOP_ARTISTS",
+          top_artists: res
+        })
+      );
+
+      dispatch({
+        type: "SET_SPOTIFY",
+        spotify: spotify,
+      });
 
       spotify.getMe().then(user => {
         dispatch({
@@ -39,19 +58,14 @@ function App() {
         });
       });
 
-      spotify.getPlaylist('37i9dQZEVXcI7V6MZlUduE').then(playlist => {
-        dispatch({
-          type: "SET_DISCOVER_WEEKLY",
-          discover_weekly: playlist,
-        })
-      })
     }
-  }, []);
+  }, [token, dispatch]);
 
   return (
     // BEM Convention: Convention used for React
     <div className="app">
-      { token ? <Player spotify={spotify} /> : <Login /> }
+      {!token && <Login />}
+      {token && <Player spotify={spotify} />}
     </div>
   );
 }
